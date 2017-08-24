@@ -9,7 +9,7 @@
 
 	<name>xltemplating</name>
 	<url>https://github.com/aji3/xltemplating</url>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<github.global.server>github</github.global.server>
@@ -92,7 +92,7 @@
 		<dependency>
 			<groupId>org.xlbean</groupId>
 			<artifactId>xlbean</artifactId>
-			<version>0.1.0</version>
+			<version>0.1.1</version>
 		</dependency>
 
 		<dependency>

@@ -47,20 +47,15 @@
 				<artifactId>site-maven-plugin</artifactId>
 				<version>0.12</version>
 				<configuration>
-					<!-- Git コミットメッセージ -->
 					<message>Maven artifacts for ${project.version}</message>
 					<noJekyll>true</noJekyll>
-					<!-- distributionManagement の url と一致させる -->
 					<outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-					<!-- リモートブランチ名 -->
 					<branch>refs/heads/mvn-repo</branch>
 					<includes>
 						<include>**/*</include>
 					</includes>
-					<!-- Github リポジトリ名 -->
-					<repositoryName>xltemplating</repositoryName>
-					<!-- Github リポジトリユーザー名 -->
-					<repositoryOwner>aji3</repositoryOwner>
+					<repositoryName>${repositoryName}</repositoryName>
+					<repositoryOwner>${ownerName}</repositoryOwner>
 				</configuration>
 				<executions>
 					<execution>

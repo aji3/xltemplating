@@ -4,7 +4,7 @@ apply plugin: 'maven'
 group = 'com.xlbean'
 version = '0.0.1'
 
-description = "xlpebble"
+description = "xltemplating"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8

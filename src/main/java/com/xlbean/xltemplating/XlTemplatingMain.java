@@ -1,8 +1,7 @@
 package com.xlbean.xltemplating;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,13 +13,32 @@ import org.xlbean.XlList;
 import org.xlbean.reader.XlBeanReader;
 import org.xlbean.util.XlBeanFactory;
 
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import com.xlbean.xltemplating.engine.TemplatingEngine;
+import com.xlbean.xltemplating.engine.TemplatingEngineFactory;
 
 public class XlTemplatingMain {
-	public static void main(String[] args) throws Exception {
-		// Create Pebble engine
-		PebbleEngine engine = new PebbleEngine.Builder().build();
+	private static final String DEFAULT_TEMPLATINGENGINEFACTORY = "com.xlbean.xltemplating.engine.pebble.PebbleEngineFactory";
+
+	private TemplatingEngineFactory templatingEngineFactory;
+
+	public static void main(String[] args) {
+		new XlTemplatingMain().start(args);
+	}
+
+	private void initializeFactory() {
+		try {
+			Class<?> factoryClass = Class.forName(DEFAULT_TEMPLATINGENGINEFACTORY);
+			if (factoryClass.isAssignableFrom(TemplatingEngineFactory.class)) {
+				templatingEngineFactory = (TemplatingEngineFactory) factoryClass.newInstance();
+			}
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			// meaning the class does not set to class path, which is OK
+		}
+	}
+
+	public void start(String[] args) {
+
+		initializeFactory();
 
 		// Override XlBeanFactory
 		XlBeanFactory.setInstance(new XlTemplatingBeanFactory());
@@ -33,7 +51,7 @@ public class XlTemplatingMain {
 		XlList scriptList = bean.list("preExecute");
 		if (scriptList != null) {
 			scriptList.forEach(script -> {
-			    ScriptHelper.getInstance().execute(script.value("logic"), bean);
+				ScriptHelper.getInstance().execute(script.value("logic"), bean);
 			});
 		}
 
@@ -50,41 +68,30 @@ public class XlTemplatingMain {
 			Path outputFile = outputDir.resolve(file.value("outputFileName"));
 			if (!Files.exists(outputDir)) {
 				// Create output directory if it doesn't exist.
-				Files.createDirectories(outputDir);
+				try {
+					Files.createDirectories(outputDir);
+				} catch (IOException e) {
+					throw new RuntimeException("File system error occured for creating output directories/files", e);
+				}
 			}
 
 			// XlBean is set directly to context given to Pebble.
-			Map<String, Object> pebbleContext = new HashMap<>();
-			pebbleContext.putAll(bean);
+			Map<String, Object> templateEngineContext = new HashMap<>();
+			templateEngineContext.putAll(bean);
 
-//			// Set key-values to Pebble context.
-//			for (int keyIndex = 0;; keyIndex++) {
-//				String key = file.value("key" + keyIndex);
-//				String keyValueScript = file.value("value" + keyIndex);
-//				if (key != null && !key.isEmpty() && keyValueScript != null && !keyValueScript.isEmpty()) {
-//					// Evaluate value then put the result into the Pebble
-//					// context.
-//				    @SuppressWarnings("serial")
-//                    Object pebbleValue = ScriptHelper.getInstance().execute(keyValueScript, new HashMap<String, Object>(){{putAll(bean);}});
-//					pebbleContext.put(key, pebbleValue);
-//				} else {
-//					break;
-//				}
-//			}
 			XlList customValues = file.list("customValues");
 			if (customValues != null) {
-			    customValues.stream().filter(elem -> elem != null).forEach(customValue -> {
-			        HashMap<String, Object> map = new HashMap<>();
-			        map.putAll(bean);
-                    Object pebbleValue = ScriptHelper.getInstance().execute(customValue.value("value"), map);
-    			    pebbleContext.put(customValue.value("key"), pebbleValue);
-    			});
+				customValues.stream().filter(elem -> elem != null).forEach(customValue -> {
+					HashMap<String, Object> map = new HashMap<>();
+					map.putAll(bean);
+					Object pebbleValue = ScriptHelper.getInstance().execute(customValue.value("value"), map);
+					templateEngineContext.put(customValue.value("key"), pebbleValue);
+				});
 			}
 
-			// Execute Pebble
-			PebbleTemplate compiledTemplate = engine.getTemplate(templateFile.toString());
-			Writer writer = new FileWriter(outputFile.toFile());
-			compiledTemplate.evaluate(writer, pebbleContext);
+			// Execute Templating Engine
+			TemplatingEngine engine = templatingEngineFactory.createEngine();
+			engine.generate(templateFile, outputFile, templateEngineContext);
 		}
 	}
 }

@@ -12,8 +12,6 @@ public class XlTemplatingBean extends XlBean {
 	@Override
 	public Object get(Object key) {
 		if (key instanceof String  && pattern.matcher((String)key).matches()) {
-//	    System.out.println(key);
-//	    if (key instanceof String && ((String) key).indexOf('`') >= 0) {
 			String keyStr = (String)key;
 			return ScriptHelper.getInstance().execute(keyStr.replaceAll("`", ""), this);
 		}

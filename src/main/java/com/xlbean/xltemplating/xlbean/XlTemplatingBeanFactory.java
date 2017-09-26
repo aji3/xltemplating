@@ -1,4 +1,4 @@
-package com.xlbean.xltemplating;
+package com.xlbean.xltemplating.xlbean;
 
 import org.xlbean.XlBean;
 import org.xlbean.util.XlBeanFactory;

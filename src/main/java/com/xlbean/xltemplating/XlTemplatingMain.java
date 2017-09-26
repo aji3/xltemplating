@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 import org.xlbean.XlBean;
 import org.xlbean.XlList;
 import org.xlbean.reader.XlBeanReader;
@@ -15,19 +17,19 @@ import org.xlbean.util.XlBeanFactory;
 
 import com.xlbean.xltemplating.engine.TemplatingEngine;
 import com.xlbean.xltemplating.engine.TemplatingEngineFactory;
+import com.xlbean.xltemplating.script.ScriptHelper;
+import com.xlbean.xltemplating.xlbean.XlTemplatingBeanFactory;
 
 public class XlTemplatingMain {
-	private static final String DEFAULT_TEMPLATINGENGINEFACTORY = "com.xlbean.xltemplating.engine.pebble.PebbleEngineFactory";
-
 	private TemplatingEngineFactory templatingEngineFactory;
 
 	public static void main(String[] args) {
 		new XlTemplatingMain().start(args);
 	}
 
-	private void initializeFactory() {
+	private void initializeFactory(String className) {
 		try {
-			Class<?> factoryClass = Class.forName(DEFAULT_TEMPLATINGENGINEFACTORY);
+			Class<?> factoryClass = Class.forName(className);
 			if (factoryClass.isAssignableFrom(TemplatingEngineFactory.class)) {
 				templatingEngineFactory = (TemplatingEngineFactory) factoryClass.newInstance();
 			}
@@ -37,15 +39,28 @@ public class XlTemplatingMain {
 	}
 
 	public void start(String[] args) {
+		Args arguments = new Args();
 
-		initializeFactory();
+        CmdLineParser parser = new CmdLineParser(arguments);
+        try {
+            parser.parseArgument(args);
+        } catch (CmdLineException e) {
+            e.printStackTrace();
+            return;
+        }
+        if (arguments.isHelp()) {
+            parser.printUsage(System.out);
+            return;
+        }
+        
+		initializeFactory(arguments.getTemplatingEngineFQCN());
 
 		// Override XlBeanFactory
 		XlBeanFactory.setInstance(new XlTemplatingBeanFactory());
 
 		// Read Excel data by XlBean
 		XlBeanReader reader = new XlBeanReader();
-		XlBean bean = reader.read(new File("./AppDefinition.xlsx"));
+		XlBean bean = reader.read(new File(arguments.getExcelFilePath()));
 
 		// Execute pre-execute script
 		XlList scriptList = bean.list("preExecute");

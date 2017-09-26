@@ -1,8 +1,10 @@
-package com.xlbean.xltemplating;
+package com.xlbean.xltemplating.xlbean;
 
 import java.util.regex.Pattern;
 
 import org.xlbean.XlBean;
+
+import com.xlbean.xltemplating.script.ScriptHelper;
 
 @SuppressWarnings("serial")
 public class XlTemplatingBean extends XlBean {

@@ -1,4 +1,4 @@
-package com.xlbean.xltemplating;
+package com.xlbean.xltemplating.script;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -2,9 +2,9 @@ package com.xlbean.xltemplating;
 
 import org.kohsuke.args4j.Option;
 
-public class Args {
+public class ParsedArgs {
 
-	@Option(name="-e", aliases="--excelFile", usage="Path to Excel definition file")
+	@Option(name="-f", aliases="--excelFile", usage="Path to Excel definition file")
 	private String excelFilePath = "definitions.xlsx";
 
     @Option(name="-t", aliases="--templatingEngineFactory", usage="Fully Qualified Class Name of template engine factory class")

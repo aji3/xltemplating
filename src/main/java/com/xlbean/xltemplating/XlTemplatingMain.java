@@ -21,13 +21,9 @@ import com.xlbean.xltemplating.script.ScriptHelper;
 import com.xlbean.xltemplating.xlbean.XlTemplatingBeanFactory;
 
 public class XlTemplatingMain {
-	private TemplatingEngineFactory templatingEngineFactory;
+	private static TemplatingEngineFactory templatingEngineFactory;
 
-	public static void main(String[] args) {
-		new XlTemplatingMain().start(args);
-	}
-
-	private void initializeFactory(String className) {
+	private static void initializeFactory(String className) {
 		try {
 			Class<?> factoryClass = Class.forName(className);
 			if (factoryClass.isAssignableFrom(TemplatingEngineFactory.class)) {
@@ -38,8 +34,8 @@ public class XlTemplatingMain {
 		}
 	}
 
-	public void start(String[] args) {
-		Args arguments = new Args();
+	public static void main(String[] args) {
+		ParsedArgs arguments = new ParsedArgs();
 
         CmdLineParser parser = new CmdLineParser(arguments);
         try {
@@ -90,7 +86,6 @@ public class XlTemplatingMain {
 				}
 			}
 
-			// XlBean is set directly to context given to Pebble.
 			Map<String, Object> templateEngineContext = new HashMap<>();
 			templateEngineContext.putAll(bean);
 

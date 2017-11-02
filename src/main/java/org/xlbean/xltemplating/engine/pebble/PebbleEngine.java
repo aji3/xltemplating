@@ -10,13 +10,14 @@ import org.xlbean.xltemplating.engine.TemplatingEngine;
 import org.xlbean.xltemplating.engine.TemplatingException;
 
 import com.mitchellbosecke.pebble.error.PebbleException;
+import com.mitchellbosecke.pebble.loader.FileLoader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 public class PebbleEngine implements TemplatingEngine {
 
 	@Override
 	public void generate(Path templateFile, Path outputFile, Map<String, Object> templateEngineContext) {
-		com.mitchellbosecke.pebble.PebbleEngine engine = new com.mitchellbosecke.pebble.PebbleEngine.Builder().build();
+		com.mitchellbosecke.pebble.PebbleEngine engine = new com.mitchellbosecke.pebble.PebbleEngine.Builder().loader(new FileLoader()).build();
 
 		try {
 			PebbleTemplate compiledTemplate = engine.getTemplate(templateFile.toString());

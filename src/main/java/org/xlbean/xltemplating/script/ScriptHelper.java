@@ -2,7 +2,6 @@ package org.xlbean.xltemplating.script;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.script.Bindings;
 import javax.script.Compilable;
 import javax.script.CompiledScript;

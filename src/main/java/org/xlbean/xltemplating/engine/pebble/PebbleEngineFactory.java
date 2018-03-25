@@ -5,9 +5,9 @@ import org.xlbean.xltemplating.engine.TemplatingEngineFactory;
 
 public class PebbleEngineFactory extends TemplatingEngineFactory {
 
-	@Override
-	public TemplatingEngine createEngine() {
-		return new PebbleEngine();
-	}
+    @Override
+    public TemplatingEngine createEngine() {
+        return new PebbleEngine();
+    }
 
 }

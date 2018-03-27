@@ -8,18 +8,19 @@ import java.util.Map;
 import org.xlbean.xltemplating.engine.TemplatingEngine;
 import org.xlbean.xltemplating.engine.TemplatingException;
 import com.mitchellbosecke.pebble.error.PebbleException;
-import com.mitchellbosecke.pebble.loader.FileLoader;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 
 public class PebbleEngine implements TemplatingEngine {
 
+    private com.mitchellbosecke.pebble.PebbleEngine engine;
+
+    public PebbleEngine(com.mitchellbosecke.pebble.PebbleEngine engine) {
+        this.engine = engine;
+    }
+
     @Override
     public void generate(Path templateFile, Path outputFile,
             Map<String, Object> templateEngineContext) {
-        com.mitchellbosecke.pebble.PebbleEngine engine =
-                new com.mitchellbosecke.pebble.PebbleEngine.Builder()
-                        .loader(new FileLoader())
-                        .build();
 
         try {
             PebbleTemplate compiledTemplate = engine.getTemplate(templateFile.toString());

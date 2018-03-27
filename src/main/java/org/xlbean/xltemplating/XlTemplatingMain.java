@@ -118,7 +118,8 @@ public class XlTemplatingMain {
             }
 
             // Execute Templating Engine
-            TemplatingEngine engine = templatingEngineFactory.createEngine();
+            TemplatingEngine engine =
+                    templatingEngineFactory.createEngine(root.toAbsolutePath().toString());
             engine.generate(templateFile, outputFile, templateEngineContext);
         }
     }
@@ -140,6 +141,9 @@ public class XlTemplatingMain {
             // for its folder.
             Path excelFileDir = Paths.get(excelFilePath).getParent();
             retPath = excelFileDir.resolve(pathStr);
+            if (pathStr.endsWith(".")) {
+                retPath = retPath.getParent();
+            }
         }
         return retPath;
     }

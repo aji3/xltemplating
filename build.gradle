@@ -79,6 +79,7 @@ repositories {
 dependencies {
     compile group: 'com.mitchellbosecke', name: 'pebble', version:'2.3.0'
     compile group: 'org.codehaus.groovy', name: 'groovy-jsr223', version:'2.4.10'
+    compile 'org.slf4j:slf4j-api:1.7.25'
     compile group: 'ch.qos.logback', name: 'logback-classic', version:'1.2.2'
     compile group: 'ch.qos.logback', name: 'logback-core', version:'1.2.2'
     compile group: 'org.xlbean', name: 'xlbean', version:'0.1.5'

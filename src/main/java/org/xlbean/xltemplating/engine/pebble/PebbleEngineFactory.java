@@ -13,10 +13,9 @@ public class PebbleEngineFactory extends TemplatingEngineFactory {
     @Override
     public TemplatingEngine createEngine(String rootPath) {
         Loader<String> loader = new ExtendedFileLoader(rootPath);
-        com.mitchellbosecke.pebble.PebbleEngine engine =
-                new com.mitchellbosecke.pebble.PebbleEngine.Builder()
-                        .loader(loader)
-                        .build();
+        com.mitchellbosecke.pebble.PebbleEngine engine = new com.mitchellbosecke.pebble.PebbleEngine.Builder()
+            .loader(loader)
+            .build();
 
         return new PebbleEngine(engine);
     }

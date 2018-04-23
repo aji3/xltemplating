@@ -9,8 +9,7 @@ public class ParsedArgs {
 
     @Option(name = "-t", aliases = "--templatingEngineFactory",
             usage = "Fully Qualified Class Name of template engine factory class")
-    private String templatingEngineFQCN =
-            XlTemplatingMain.DEFAULT_TEMPLATING_ENGINE_FACTORY_FQCN.getClass().getName();
+    private String templatingEngineFQCN = XlTemplating.DEFAULT_TEMPLATING_ENGINE_FACTORY.getClass().getName();
 
     @Option(name = "-h", aliases = "--help", usage = "Print usage message and exit")
     private boolean help = false;

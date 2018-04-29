@@ -1,0 +1,27 @@
+{% autoescape false %}
+{% macro keyFields(entity, withType, withPathVariable, byGetter, withMyBatisParam) %}
+{% for key in entity.keys %}
+{{loop.index == 0 ? '' : ', '}}{{withPathVariable ? '@PathVariable ' : ''}}{{withMyBatisParam ? '@Param("' + key.propertyName + '") ' : ''}}{{withType ? key.type + ' ' : ''}}{{byGetter ? 'object.get' + key.propertyName | capitalize + '()' : key.propertyName}}
+{% endfor %}
+{% endmacro %}
+{##}
+{% macro parentKeyFields(entity, withType, withPathVariable, byGetter, withMyBatisParam) %}
+{% for key in entity.parentKeys %}
+{{loop.index == 0 ? '' : ', '}}{{withPathVariable ? '@PathVariable ' : ''}}{{withMyBatisParam ? '@Param("' + key.propertyName + '") ' : ''}}{{withType ? key.type + ' ' : ''}}{{byGetter ? 'object.get' + key.propertyName | capitalize + '()' : key.propertyName}}
+{% endfor %}
+{% endmacro %}
+{##}
+{% macro apiUrlKeyFields(entity) %}
+{% for key in entity.keys %}
+{% if not key.isParentKey %}{{'/{' + key.propertyName + '}'}}{% endif %}
+{% endfor %}
+{% endmacro %}
+{##}
+{% macro keyFieldsForGenerateKey(entity, key, withType, byGetter) %}
+{% for keyParam in entity.keys %}
+{% if key["`Integer.decode(keyId)`"] > keyParam["`Integer.decode(keyId)`"] %}
+{{withType ? key.type + ' ' : ''}}{{byGetter ? 'object.get' + keyParam.propertyName | capitalize + '()' : keyParam.propertyName}}{{key["`Integer.decode(keyId)`"] - 1 > keyParam["`Integer.decode(keyId)`"] ? ', ' : ''}}
+{% endif %}
+{% endfor %}
+{% endmacro %}
+{% endautoescape %}

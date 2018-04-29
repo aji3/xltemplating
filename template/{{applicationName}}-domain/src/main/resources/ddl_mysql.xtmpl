@@ -1,0 +1,12 @@
+{% for domain in domains %}
+CREATE DATABASE IF NOT EXISTS `{{ domain.domain }}`;
+{% endfor %}
+
+{% for entity in entities %}
+CREATE TABLE IF NOT EXISTS `{{ entity.domain }}`.`{{ entity.entityName }}` (
+  {% for property in entity.properties %}
+  `{{ property.columnName }}` {{ property.columnType }}{{ property.nullable == 'NO' ? ' NOT NULL' : '' }},
+  {% endfor %}
+  PRIMARY KEY ({% for key in entity.keys %}`{{key.columnName}}`{{loop.index == loop.length - 1 ? '' : ','}}{% endfor %})
+);
+{% endfor %} 

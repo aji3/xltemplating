@@ -1,0 +1,30 @@
+{####
+iterator {
+    xlbean.entities
+}
+output {
+    dir {
+        mapperPackage.replaceAll('\\.', '/')
+    }
+    filename {
+        mapperClass + ".java"
+    }
+    override {
+        false
+    }
+}
+
+####}
+
+package {{mapperPackage}};
+
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.context.annotation.Primary;
+
+import {{mapperGenPackage}}.{{mapperGenClass}};
+
+@Mapper
+@Primary
+public interface {{mapperClass}} extends {{mapperGenClass}} {
+
+}

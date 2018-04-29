@@ -20,9 +20,16 @@ public class XlTemplatingMain {
             return;
         }
 
-        XlTemplating templating = new XlTemplating();
-        templating.initialize(arguments.getTemplatingEngineFQCN());
-        templating.execute(arguments.getExcelFilePath());
+        // XlTemplating templating = new XlTemplating();
+        // templating.initialize(arguments.getTemplatingEngineFQCN());
+        // templating.execute(arguments.getExcelFilePath());
+
+        XlTemplating2 templating = new XlTemplating2();
+        // templating.initialize(arguments.getTemplatingEngineFQCN());
+        templating.execute(
+            arguments.getExcelFilePath(),
+            arguments.getTemplateDirectoryPath(),
+            arguments.getOutputDirectoryPath());
     }
 
 }

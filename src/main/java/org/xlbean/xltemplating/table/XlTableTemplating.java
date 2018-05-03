@@ -1,4 +1,4 @@
-package org.xlbean.xltemplating;
+package org.xlbean.xltemplating.table;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,11 +20,11 @@ import org.xlbean.xltemplating.engine.pebble.PebbleEngineFactory;
 import org.xlbean.xltemplating.script.ScriptHelper;
 import org.xlbean.xltemplating.xlbean.XlTemplatingBeanFactory;
 
-public class XlTemplating {
+public class XlTableTemplating {
 
     public static final TemplatingEngineFactory DEFAULT_TEMPLATING_ENGINE_FACTORY = new PebbleEngineFactory();
 
-    private static Logger log = LoggerFactory.getLogger(XlTemplating.class);
+    private static Logger log = LoggerFactory.getLogger(XlTableTemplating.class);
 
     private TemplatingEngineFactory templatingEngineFactory;
 

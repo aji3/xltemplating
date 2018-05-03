@@ -1,6 +1,7 @@
 package org.xlbean.xltemplating;
 
 import org.kohsuke.args4j.Option;
+import org.xlbean.xltemplating.table.XlTableTemplating;
 
 public class ParsedArgs {
 
@@ -15,7 +16,7 @@ public class ParsedArgs {
 
     @Option(name = "-e", aliases = "--templatingEngineFactory",
             usage = "Fully Qualified Class Name of template engine factory class")
-    private String templatingEngineFQCN = XlTemplating.DEFAULT_TEMPLATING_ENGINE_FACTORY.getClass().getName();
+    private String templatingEngineFQCN = XlTableTemplating.DEFAULT_TEMPLATING_ENGINE_FACTORY.getClass().getName();
 
     @Option(name = "-h", aliases = "--help", usage = "Print usage message and exit")
     private boolean help = false;

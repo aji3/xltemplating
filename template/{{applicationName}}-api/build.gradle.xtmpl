@@ -1,4 +1,10 @@
-
+{####
+output {
+    override {
+        false
+    }
+}
+####}
 sourceSets {
     main {
         java {
@@ -11,8 +17,6 @@ sourceSets {
 }
 
 dependencies {
-	compile group: 'com.mitchellbosecke', name: 'pebble', version: '2.4.0'
-
     compile project(':{{applicationName}}-domain')
     compile project(':xlapi')
 }

@@ -4,7 +4,6 @@ domains = entities.aggregate("entities", "domain")
 entities.each{entity -> entity.put('properties', properties.findAll(['entityName':entity.entityName]))}
 
 // add default properties to entity
-println "${defaultProperties}"
 entities.each{entity -> 
   defaultProperties.each {defaultProperty -> 
     entity.properties.add(defaultProperty)
@@ -25,3 +24,10 @@ entities.each{entity ->
 
 codeMasterMap = codes.aggregate('codes', 'type').toMap('type')
 entities.each{ entity -> entity.put('codeMaster', codeMasterMap)}
+
+daoMapperPackages = entities.collect{it.daoPackage}.unique()
+
+xlbean.domains = domains
+xlbean.codeMasterMap = codeMasterMap
+xlbean.daoMapperPackages = daoMapperPackages
+

@@ -2,6 +2,7 @@ package org.xlbean.xltemplating;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
+import org.xlbean.xltemplating.core.XlTemplating;
 
 public class XlTemplatingMain {
 
@@ -20,13 +21,8 @@ public class XlTemplatingMain {
             return;
         }
 
-        // XlTemplating templating = new XlTemplating();
-        // templating.initialize(arguments.getTemplatingEngineFQCN());
-        // templating.execute(arguments.getExcelFilePath());
-
-        XlTemplating2 templating = new XlTemplating2();
-        // templating.initialize(arguments.getTemplatingEngineFQCN());
-        templating.execute(
+        new XlTemplating().execute(
+            arguments.getTemplatingEngineFQCN(),
             arguments.getExcelFilePath(),
             arguments.getTemplateDirectoryPath(),
             arguments.getOutputDirectoryPath());

@@ -1,3 +1,10 @@
+{####
+output {
+    override {
+        false
+    }
+}
+####}
 dependencies {
     compile project(':xlapi')
 }

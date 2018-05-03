@@ -1,0 +1,103 @@
+{####
+iterator {
+    xlbean.entities
+}
+output {
+    dir {
+        daoPackage.replaceAll('\\.', '/')
+    }
+    filename {
+        daoClass + ".java"
+    }
+}
+
+####}
+
+{% import "macros.txt" %}
+package {{daoPackage}};
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import {{mapperPackage}}.{{mapperClass}};
+import {{javaPackage}}.{{javaClass}};
+import org.xlbean.xlapi.dao.DaoUtil;
+
+@Component
+public class {{daoClass}} {
+
+    @Autowired
+    private {{mapperClass}} mapper;
+    
+    public {{javaClass}} selectOne({{keyFields(_it, true, false, false)}}) {
+        return mapper.selectOne({{keyFields(_it, false, false, false)}});
+    }
+    
+    public List<{{javaClass}}> selectList({{parentKeyFields(_it, true, false, false)}}{{parentKeys.size > 0 ? ', ' : ''}}int offset, int limit) {
+        return mapper.selectList({{parentKeyFields(_it, false, false, false)}}{{parentKeys.size > 0 ? ', ' : ''}}offset, limit);
+    }
+    
+    public {{javaClass}} insert({{javaClass}} object) {
+        return insert(object, false);
+    }
+    
+    public {{javaClass}} insert({{javaClass}} object, boolean autoGenerateId) {
+        if (autoGenerateId) {
+            object.updateKey({{generators(_it)}});
+        }
+        DaoUtil.updateSystemValueForInsert(object);
+        mapper.insert(object);
+        return object;
+    }
+
+    public void update({{javaClass}} object) {
+        DaoUtil.updateSystemValueForUpdate(object);
+        mapper.update(object);
+    }
+
+    public void updatePartial({{javaClass}} object) {
+        DaoUtil.updateSystemValueForUpdate(object);
+        mapper.updateSelective(object);
+    }
+    
+    public {{javaClass}} upsert({{javaClass}} object) {
+        {{javaClass}} registeredObject = mapper.selectOne({{keyFields(_it, false, false, true)}});
+        if (registeredObject == null) {
+            insert(object, false);
+            return object;
+        } else {
+            DaoUtil.updateSystemValueForUpdate(object);
+            mapper.updateSelective(object);
+            return object;
+        }
+    }
+    
+    public void delete({{keyFields(_it, true, false, false)}}) {
+        mapper.delete({{keyFields(_it, false, false, false)}});
+    }
+
+{% for key in keys %}
+{% if not key.isParentKey %}
+    public {{key.type}} {{generatorName(key)}}({{keyFieldsForGenerateKey(_it, key, true)}}) {
+        return mapper.{{generatorName(key)}}({{keyFieldsForGenerateKey(_it, key, false)}});
+    }
+
+{% endif %}
+{% endfor %}
+
+}
+{##}
+{% macro generatorName(property) %}
+generate{{property.propertyName | capitalize}}
+{% endmacro %}
+{##}
+{% macro generators(entity) %}
+{% for key in entity.keys %}
+{% if not key.isParentKey %}
+{{generatorName(key)}}({{keyFieldsForGenerateKey(entity, key, false, true)}}){% else %}
+null{% endif %}
+{{loop.index == loop.length - 1 ? '' : ', '}}
+{% endfor %}
+{% endmacro %}

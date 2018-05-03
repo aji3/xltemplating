@@ -1,3 +1,10 @@
+{####
+output {
+    override {
+        false
+    }
+}
+####}
 buildscript {
     repositories {
         mavenCentral()

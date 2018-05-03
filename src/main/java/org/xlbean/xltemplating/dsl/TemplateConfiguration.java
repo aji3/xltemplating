@@ -5,20 +5,19 @@ import java.util.Map;
 
 import groovy.lang.Closure;
 
-public class Configuration {
-    private List<Map<String, ?>> iterator;
-    private Closure<String> baseDir;
+public class TemplateConfiguration {
+    private List<Map<String, Object>> iterator;
     private Closure<String> dir;
     private Closure<String> filename;
     private Closure<Boolean> skip;
     private Closure<Boolean> skipFile;
     private Closure<Boolean> override;
 
-    public List<Map<String, ?>> getIterator() {
+    public List<Map<String, Object>> getIterator() {
         return iterator;
     }
 
-    public void setIterator(List<Map<String, ?>> iterator) {
+    public void setIterator(List<Map<String, Object>> iterator) {
         this.iterator = iterator;
     }
 
@@ -36,14 +35,6 @@ public class Configuration {
 
     public void setFilename(Closure<String> filename) {
         this.filename = filename;
-    }
-
-    public Closure<String> getBaseDir() {
-        return baseDir;
-    }
-
-    public void setBaseDir(Closure<String> baseDir) {
-        this.baseDir = baseDir;
     }
 
     public Closure<Boolean> getSkip() {

@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:h2:../.data/h2/db;MODE=Oracle
+    username: 
+    password: 
+    driverClassName: org.h2.Driver
+

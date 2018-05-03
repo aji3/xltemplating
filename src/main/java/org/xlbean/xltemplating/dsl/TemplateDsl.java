@@ -3,31 +3,29 @@ package org.xlbean.xltemplating.dsl;
 import java.util.List;
 import java.util.Map;
 
-import org.xlbean.XlBean;
-
 import groovy.lang.Closure;
 import groovy.lang.Script;
 
+/**
+ * DSL base class for template. This class defines basic structure of DSL.
+ * 
+ * <p>
+ * Basically result of DSL is stored in {@code config}.
+ * </p>
+ * 
+ * @author tanikawa
+ *
+ */
 public abstract class TemplateDsl extends Script {
 
-    private XlBean xlbean;
+    private TemplateConfiguration config = new TemplateConfiguration();
 
-    private Configuration config = new Configuration();
-
-    public void iterator(Closure<List<Map<String, ?>>> iterator) {
+    public void iterator(Closure<List<Map<String, Object>>> iterator) {
         config.setIterator(iterator.call());
     }
 
-    public Configuration getConfig() {
+    public TemplateConfiguration getConfig() {
         return config;
-    }
-
-    public XlBean getXlbean() {
-        return xlbean;
-    }
-
-    public void setXlbean(XlBean xlbean) {
-        this.xlbean = xlbean;
     }
 
     public void output(Closure<OutputDelegate> cl) {
@@ -36,10 +34,6 @@ public abstract class TemplateDsl extends Script {
     }
 
     public class OutputDelegate {
-        public void baseDir(Closure<String> cl) {
-            config.setBaseDir(cl);
-        }
-
         public void dir(Closure<String> cl) {
             config.setDir(cl);
         }

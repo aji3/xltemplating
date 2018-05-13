@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>{{applicationName}}-build</name>
+	<name>{{applicationName}}-api</name>
 	<comment>Project {{applicationName}}-build created by Buildship.</comment>
 	<projects>
 	</projects>

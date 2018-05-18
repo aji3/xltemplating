@@ -1,0 +1,47 @@
+{####
+iterator {
+    xlbean.entities
+}
+output {
+    dir {
+        mapperGenPackage.replaceAll('\\.', '/')
+    }
+    filename {
+        mapperGenClass + ".java"
+    }
+}
+
+####}
+
+{% import "macros.txt" %}
+{% autoescape false %}
+package {{mapperGenPackage}};
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import {{javaPackage}}.{{javaClass}};
+
+@Mapper
+public interface {{mapperGenClass}} {
+
+    {{javaClass}} selectOne({{ keyFields(_it, true, false, false, true) }});
+
+    List<{{javaClass}}> selectList({{parentKeyFields(_it, true, false, false, true)}}{{parentKeys.size > 0 ? ', ' : ''}}@Param("offset") Integer offset, @Param("limit") Integer limit);
+
+    void insert(@Param("record") {{javaClass}} record);
+
+    void update(@Param("record") {{javaClass}} record);
+
+    void updateSelective(@Param("record") {{javaClass}} record);
+
+    void delete({{ keyFields(_it, true, false, false, true) }});
+
+{% for key in keys %}
+    {{key.type}} generate{{key.propertyName | capitalize}}({{keyFieldsForGenerateKey(_it, key, true, false)}});
+
+{% endfor %}
+}
+{% endautoescape %}

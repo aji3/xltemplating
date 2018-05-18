@@ -1,0 +1,76 @@
+{####
+iterator {
+    xlbean.entities
+}
+output {
+    dir {
+        javaPackage.replaceAll('\\.', '/')
+    }
+    filename {
+        javaClass + ".java"
+    }
+}
+
+####}
+
+{% autoescape false %}
+package {{javaPackage}};
+
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import lombok.Data;
+
+@Data
+public class {{javaClass}} {
+{% for property in properties%}
+{% if property.type == 'Code'%}
+    public enum {{property.codeType}} {{"{"}}
+{%for code in codeMaster[property.codeType].codes %}
+{{code.code}}, {% endfor %}{{"};"}} 
+{% endif %}
+{% endfor %}
+
+{% for property in properties%}
+{% if property.validation.nullable == 'NotNull' %}
+    {{'@NotNull'}} 
+{% endif %}
+{% if property.validation.decimal.min is not empty %}
+    {{'@DecimalMin("' + property.validation.decimal.min + '")'}} 
+{% endif %}
+{% if property.validation.decimal.max is not empty %}
+    {{'@DecimalMax("' + property.validation.decimal.max + '")'}} 
+{% endif %}
+{% if property.validation.string.min is not empty and property.validation.string.max is not empty %}
+    {{'@Size(min = ' + property.validation.string.min + ', max = ' + property.validation.string.max + ')'}} 
+{% elseif property.validation.string.min is not empty %}
+    {{'@Size(min = ' + property.validation.string.min + ')'}} 
+{% elseif property.validation.string.max is not empty %}
+    {{'@Size(max = ' + property.validation.string.max + ')'}} 
+{% endif %}
+{% if property.validation.string.pattern is not empty %}
+    {{'@Pattern(regexp = "' + property.validation.string.pattern + '")'}} 
+{% endif %}
+    private {{property.type == 'Code' ? property.codeType : property.type}} {{property.propertyName}};
+{% endfor %}
+
+    public void updateKey({{keyFields(_it, true)}}) {
+{% for key in keys %}
+        if ({{key.propertyName}} != null) {
+            this.{{key.propertyName}} = {{key.propertyName}};
+        }
+{% endfor %}
+    }
+}
+{##}
+{% macro keyFields(entity, withType) %}
+{% for key in entity.keys %}
+{{withType ? key.type + ' ' : ''}}{{key.propertyName}}{{loop.index == loop.length - 1 ? '' : ', '}}
+{% endfor %}
+{% endmacro %}
+{% endautoescape %}

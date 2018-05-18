@@ -1,0 +1,120 @@
+{####
+iterator {
+    xlbean.entities
+}
+output {
+    dir {
+        mapperGenPackage.replaceAll('\\.', '/')
+    }
+    filename {
+        mapperGenClass + ".xml"
+    }
+}
+
+####}
+{% import "macros.txt" %}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="{{mapperGenPackage}}.{{mapperGenClass}}">
+
+    <resultMap id="BaseResultMap" type="{{javaPackage}}.{{javaClass}}">
+{% for property in properties %}
+        <result column="{{property.columnName}}" property="{{property.propertyName}}" />
+{% endfor %}
+    </resultMap>
+
+    <sql id="baseColumns">
+        {% for property in properties %}{{property.columnName}}{{loop.index == loop.length - 1 ? '' : ','}} {% endfor %} 
+    </sql>
+
+    <select id="selectOne" resultMap="BaseResultMap">
+        select
+        <include refid="baseColumns" />
+        from {{domain}}.{{tableName}} 
+        where
+{% for key in keys %}
+            {{loop.index == 0 ? '' : 'AND '}}{{key.columnName}} = {{"#{"}}{{key.propertyName}}} 
+{% endfor %}
+    </select>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        select
+        <include refid="baseColumns" /> 
+        from {{domain}}.{{tableName}} 
+        where
+            1 = 1
+{% for key in keys %}
+{% if key.isParentKey %}            AND {{key.columnName}} = {{"#{"}}{{key.propertyName}}}{% endif %} 
+{% endfor %}
+        <if test="limit != null and offset != null">
+            limit #{offset}, #{limit}
+        </if>
+        <if test="limit != null and offset == null">
+            limit #{limit}
+        </if>
+    </select>
+
+    <delete id="delete">
+        delete from {{domain}}.{{tableName}} 
+        where
+{% for key in keys %}
+            {{loop.index == 0 ? '' : 'AND'}}{{key.columnName}} = {{"#{"}}{{key.propertyName}}} 
+{% endfor %}
+    </delete>
+  
+    <insert id="insert" parameterType="{{javaPackage}}.{{javaClass}}">
+        insert into {{domain}}.{{tableName}} (
+{% for property in properties %}
+            {{property.columnName}}{{loop.index == loop.length - 1 ? '' : ','}} 
+{% endfor %}
+        ) values (
+{% for property in properties %}
+            {{"#{record."}}{{property.propertyName}}}{{loop.index == loop.length - 1 ? '' : ','}} 
+{% endfor %}
+        )
+    </insert>
+
+    <update id="update" parameterType="{{javaPackage}}.{{javaClass}}">
+        update {{domain}}.{{tableName}} 
+        <set>
+{% for property in properties %}
+            {{property.columnName}} = {{"#{record."}}{{property.propertyName}}}{{loop.index == loop.length - 1 ? '' : ','}} 
+{% endfor %}
+        </set>
+        where
+{% for key in keys %}
+            {{loop.index == 0 ? '' : 'AND'}} {{key.columnName}} = {{"#{record."}}{{key.propertyName}}} 
+{% endfor %}
+    </update>
+    
+    <update id="updateSelective" parameterType="{{javaPackage}}.{{javaClass}}">
+        update {{domain}}.{{tableName}} 
+        <set>
+{% for property in properties %}
+            <if test="record.{{property.propertyName}} != null">{{property.columnName}} = {{"#{record."}}{{property.propertyName}}}{{loop.index == loop.length - 1 ? '' : ','}}</if>
+{% endfor %}
+        </set>
+        where
+{% for key in keys %}
+            {{loop.index == 0 ? '' : 'AND'}} {{key.columnName}} = {{"#{"}}record.{{key.propertyName}}} 
+{% endfor %}
+    </update>
+
+{% for key in keys %}
+    <select id="generate{{key.propertyName | capitalize}}" resultType="int">
+        select ifnull(max({{key.columnName}}) + 1,1) from {{domain}}.{{tableName}} 
+{{ keyFieldsForGenerateKey(_it, key) }}
+    </select>
+
+{% endfor %}
+
+</mapper>
+{##}
+{% macro keyFieldsForGenerateKey(_it, key) %}
+{% for keyParam in keys %}
+{% if key["`Integer.decode(keyId)`"] > keyParam["`Integer.decode(keyId)`"] %}
+        {{loop.index == 0 ? 'where' : '' }} 
+            {{keyParam.columnName}} = {{"#{"}}{{keyParam.propertyName}}}{{key["`Integer.decode(keyId)`"] > keyParam["`Integer.decode(keyId)`"] - 1 ? '' : ' AND '}} 
+{% endif %}
+{% endfor %}
+{% endmacro %}

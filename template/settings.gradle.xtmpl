@@ -1,0 +1,2 @@
+rootProject.name = '_build'
+include '{{applicationName}}-api', '{{applicationName}}-domain', 'xlapi'

@@ -1,0 +1,7 @@
+# these rows should be ignored
+# since this is comment
+
+\#this_is_not_comment/and/should_start_from_#
+
+# this cannot be tested on this code
+this_back_slash/should_not_unescaped/here_\_here

@@ -1,17 +1,17 @@
-domains = entities.aggregate("entities", "domain")
+//domains = entities.aggregate("entities", "domain")
 
 // link entity with properties
-entities.each{entity -> entity.put('properties', properties.findAll(['entityName':entity.entityName]))}
+//entities.each{entity -> entity.put('properties', properties.findAll(['entityName':entity.entityName]))}
 
 // add default properties to entity
-entities.each{entity -> 
-  defaultProperties.each {defaultProperty -> 
-    entity.properties.add(defaultProperty)
-  }
-}
+//entities.each{entity -> 
+//  defaultProperties.each {defaultProperty -> 
+//    entity.properties.add(defaultProperty)
+//  }
+//}
 
 // create list of keys in entity
-entities.each{it.put('keys', it.properties.findAll{it.keyId != null && it.keyId.length() > 0})}
+//entities.each{it.put('keys', it.properties.findAll{it.keyId != null && it.keyId.length() > 0})}
 
 // create list of keys which are not included in the apiUrl
 entities.each{entity ->
@@ -22,12 +22,15 @@ entities.each{entity ->
   entity.put('parentKeys', entity.keys.findAll{it.isParentKey})
 } 
 
-codeMasterMap = codes.aggregate('codes', 'type').toMap('type')
-entities.each{ entity -> entity.put('codeMaster', codeMasterMap)}
+//codeMasterMap = codes.aggregate('codes', 'type').toMap('type')
+//entities.each{ entity -> entity.put('codeMaster', codeMasterMap)}
 
-daoMapperPackages = entities.collect{it.daoPackage}.unique()
+//daoMapperPackages = entities.collect{it.daoPackage}.unique()
 
-xlbean.domains = domains
-xlbean.codeMasterMap = codeMasterMap
-xlbean.daoMapperPackages = daoMapperPackages
+//$excel.domains = domains
+//$excel.codeMasterMap = codeMasterMap
+//$excel.daoMapperPackages = daoMapperPackages
 
+
+println 'this is prescript'
+println domains

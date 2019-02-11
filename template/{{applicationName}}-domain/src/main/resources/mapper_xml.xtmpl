@@ -1,6 +1,6 @@
 {####
 iterator {
-    xlbean.entities
+    entities
 }
 output {
     dir {

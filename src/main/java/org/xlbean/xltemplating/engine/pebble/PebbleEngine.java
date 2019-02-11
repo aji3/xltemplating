@@ -26,9 +26,9 @@ public class PebbleEngine implements TemplatingEngine {
     }
 
     @Override
-    public void generate(Path templateFile, Path outputFile,
+    public void generate(Path templateFile,
+            Path outputFile,
             Map<String, Object> templateEngineContext) {
-
         try {
             PebbleTemplate compiledTemplate = engine.getTemplate(templateFile.toString());
             Writer writer = new FileWriter(outputFile.toFile());

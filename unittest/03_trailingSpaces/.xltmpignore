@@ -1,0 +1,8 @@
+spaces_in_the_middle/of/a_line should/ a/remain
+
+trailing_spaces_should_be_trimmed-                        
+
+#trailing space cannot be tested on windows filesystem
+#if_there_is_backslash_after/trailing_spaces/then_trailing_spaces_should_remain/a      \
+
+any_last_backslash_should_be_removed\

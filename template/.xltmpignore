@@ -1,0 +1,6 @@
+# ignore all excel files
+*.xlsx
+
+# pre.groovy should not be copied to output
+pre.groovy
+

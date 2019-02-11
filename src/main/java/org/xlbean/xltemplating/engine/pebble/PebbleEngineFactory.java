@@ -2,7 +2,6 @@ package org.xlbean.xltemplating.engine.pebble;
 
 import java.io.Reader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.xlbean.xltemplating.engine.TemplatingEngine;
 import org.xlbean.xltemplating.engine.TemplatingEngineFactory;
@@ -14,7 +13,7 @@ import com.mitchellbosecke.pebble.loader.Loader;
 public class PebbleEngineFactory extends TemplatingEngineFactory {
 
     @Override
-    public TemplatingEngine createEngine(String rootPath) {
+    public TemplatingEngine createEngine(Path rootPath) {
         Loader<String> loader = new ExtendedFileLoader(rootPath);
         com.mitchellbosecke.pebble.PebbleEngine engine = new com.mitchellbosecke.pebble.PebbleEngine.Builder()
             .loader(loader)
@@ -27,8 +26,8 @@ public class PebbleEngineFactory extends TemplatingEngineFactory {
 
         private Path prefixForRelativePath;
 
-        public ExtendedFileLoader(String prefixForRelativePath) {
-            this.prefixForRelativePath = Paths.get(prefixForRelativePath);
+        public ExtendedFileLoader(Path prefixForRelativePath) {
+            this.prefixForRelativePath = prefixForRelativePath;
         }
 
         @Override

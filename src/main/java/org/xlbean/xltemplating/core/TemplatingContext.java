@@ -1,8 +1,8 @@
 package org.xlbean.xltemplating.core;
 
 import java.nio.file.Path;
+import java.util.Map;
 
-import org.xlbean.XlBean;
 import org.xlbean.xltemplating.engine.TemplatingEngine;
 import org.xlbean.xltemplating.ignore.XlTemplatingIgnores;
 
@@ -22,7 +22,7 @@ public class TemplatingContext {
     /**
      * XlBean instance of excel file which contains template definition
      */
-    private XlBean excel;
+    private Map<String, Object> excel;
 
     /**
      * Name of script file name which should be executed at the beginning.
@@ -58,11 +58,11 @@ public class TemplatingContext {
     }
 
     public String getTemplateExtension() {
-        String ret = excel.string(XLBEAN_KEY_TEMPLATE_EXTENTION);
+        String ret = (String) excel.get(XLBEAN_KEY_TEMPLATE_EXTENTION);
         if (ret != null && !ret.isEmpty()) {
             return ret;
         } else {
-            return ".xtmpl";
+            return ".xltmp";
         }
     }
 
@@ -78,7 +78,7 @@ public class TemplatingContext {
         return outputRootDir;
     }
 
-    public XlBean getExcel() {
+    public Map<String, Object> getExcel() {
         return excel;
     }
 
@@ -117,7 +117,7 @@ public class TemplatingContext {
             return this;
         }
 
-        public Builder excel(XlBean excel) {
+        public Builder excel(Map<String, Object> excel) {
             context.excel = excel;
             return this;
         }

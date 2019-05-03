@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xlbean.XlBean;
 import org.xlbean.reader.XlBeanReader;
-import org.xlbean.util.XlBeanFactory;
 import org.xlbean.xlscript.XlScriptReader;
+import org.xlbean.xlscript.util.JSON;
 import org.xlbean.xltemplating.core.TemplateGeneratorProvider;
 import org.xlbean.xltemplating.core.TemplatePathResolver;
 import org.xlbean.xltemplating.core.TemplatePreprocessor;
@@ -22,7 +22,6 @@ import org.xlbean.xltemplating.engine.TemplatingEngineFactory;
 import org.xlbean.xltemplating.engine.pebble.PebbleEngineFactory;
 import org.xlbean.xltemplating.ignore.XlTemplatingIgnoreLoader;
 import org.xlbean.xltemplating.ignore.XlTemplatingIgnores;
-import org.xlbean.xltemplating.xlbean.TemplatingBeanFactory;
 
 public class TemplatingContextInitializer {
 
@@ -34,9 +33,6 @@ public class TemplatingContextInitializer {
     private static Logger log = LoggerFactory.getLogger(TemplatingContextInitializer.class);
 
     public TemplatingContext initializeContext(TemplatingArgs args) {
-
-        // Update XlBeanFactory to be able to execute Groovy script defined as `key`
-        XlBeanFactory.setInstance(new TemplatingBeanFactory());
 
         TemplatingEngineFactory templatingEngineFactory = instantiate(
             args.getTemplatingEngineFQCN(),
@@ -89,7 +85,7 @@ public class TemplatingContextInitializer {
         XlBeanReader reader = new XlScriptReader();
         log.info("Excel file path: {}", new File(excelFilePath).getAbsolutePath());
         XlBean bean = reader.read(new File(excelFilePath));
-        log.trace("{}", bean);
+        log.debug("{}", JSON.stringify(bean));
         return bean;
     }
 

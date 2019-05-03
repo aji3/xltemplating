@@ -4,29 +4,32 @@ import java.util.Map;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.xlbean.xlscript.processor.AbstractXlScriptProcessor;
-import org.xlbean.xlscript.util.XlScript;
+import org.xlbean.xlscript.script.XlScript;
+import org.xlbean.xlscript.script.XlScriptFactory;
 
 public class DefaultTemplateFileDsl {
 
     /**
      * Run the DSL string given as argument under the Script Base Class
-     * {@link DefaultTemplateFileDslScript}.
+     * {@link DefaultTemplateFileDslConfig}.
      * 
      * @param dsl
      * @param excel
      */
-    public DefaultTemplateFileDslScript evaluate(String dsl, Map<String, Object> excel) {
-        DefaultTemplateFileDslScript baseScript = new DefaultTemplateFileDslScript(excel);
+    public DefaultTemplateFileDslConfig evaluate(String dsl, Map<String, Object> excel) {
+        DefaultTemplateFileDslConfig baseInstance = new DefaultTemplateFileDslConfig(excel);
         if (dsl == null) {
-            return baseScript;
+            return baseInstance;
         }
         Map<String, Object> map = new HashedMap<>();
         map.putAll(excel);
         map.put(AbstractXlScriptProcessor.CONTEXT_KEY_EXCEL, excel);
 
-        XlScript script = new XlScript(baseScript);
-        script.evaluate(dsl, map);
-        return baseScript;
+    	XlScriptFactory factory = new XlScriptFactory();
+    	factory.setBaseInstance(baseInstance);
+        XlScript script = factory.getXlScript(dsl);
+        script.execute(map);
+        return baseInstance;
     }
 
 }

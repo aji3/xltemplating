@@ -11,14 +11,19 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xlbean.XlBean;
+import org.xlbean.util.XlBeanFactory;
 import org.xlbean.xlscript.processor.AbstractXlScriptProcessor.XlScriptBindingsBuilder;
+import org.xlbean.xlscript.util.JSON;
 import org.xlbean.xltemplating.core.TemplateGenerator;
 import org.xlbean.xltemplating.core.TemplatePathResolver;
 import org.xlbean.xltemplating.core.TemplatingContext;
 import org.xlbean.xltemplating.core.impl.file.dsl.DefaultTemplateFileDsl;
-import org.xlbean.xltemplating.core.impl.file.dsl.DefaultTemplateFileDslScript;
-import org.xlbean.xltemplating.core.impl.file.dsl.DefaultTemplateFileDslScript.OutputConfig;
+import org.xlbean.xltemplating.core.impl.file.dsl.DefaultTemplateFileDslConfig;
+import org.xlbean.xltemplating.core.impl.file.dsl.DefaultTemplateFileDslConfig.OutputConfig;
 import org.xlbean.xltemplating.engine.TemplatingEngine;
+import org.xlbean.xltemplating.exception.XlTemplatingDslException;
+import org.xlbean.xltemplating.exception.XlTemplatingException;
 
 /**
  * Generate output from template file.
@@ -32,138 +37,155 @@ import org.xlbean.xltemplating.engine.TemplatingEngine;
  */
 public class DefaultTemplateFileGenerator implements TemplateGenerator {
 
-    private static Logger log = LoggerFactory.getLogger(DefaultTemplateFileGenerator.class);
+	private static Logger log = LoggerFactory.getLogger(DefaultTemplateFileGenerator.class);
 
-    private TemplatingEngine engine;
+	private TemplatingEngine engine;
 
-    private TemplatePathResolver pathResolver;
+	private TemplatePathResolver pathResolver;
 
-    public DefaultTemplateFileGenerator(TemplatingEngine engine, TemplatePathResolver pathResolver) {
-        this.engine = engine;
-        this.pathResolver = pathResolver;
-    }
+	public DefaultTemplateFileGenerator(TemplatingEngine engine, TemplatePathResolver pathResolver) {
+		this.engine = engine;
+		this.pathResolver = pathResolver;
+	}
 
-    /**
-     * Iterate over the beans specified by DSL in template file.
-     * 
-     * @param templateFilePath
-     * @param context
-     */
-    @Override
-    public void execute(Path templateFilePath, TemplatingContext context) {
-        if (context.isTemplate(templateFilePath)) {
-            generateFromDsl(templateFilePath, context);
-        } else {
-            copyFile(templateFilePath, context);
-        }
-    }
+	/**
+	 * Iterate over the beans specified by DSL in template file.
+	 * 
+	 * @param templateFilePath
+	 * @param context
+	 */
+	@Override
+	public void execute(Path templateFilePath, TemplatingContext context) {
+		if (context.isTemplate(templateFilePath)) {
+			generateFromDsl(templateFilePath, context);
+		} else {
+			copyFile(templateFilePath, context);
+		}
+	}
 
-    private void generateFromDsl(Path templateFilePath, TemplatingContext context) {
-        Map<String, Object> excel = context.getExcel();
+	private void generateFromDsl(Path templateFilePath, TemplatingContext context) {
+		Map<String, Object> excel = context.getExcel();
 
-        String dslString = readDSLStringFromTemplateFile(templateFilePath);
-        DefaultTemplateFileDslScript dsl = new DefaultTemplateFileDsl().evaluate(dslString, excel);
+		log.info("- START template file. {}", templateFilePath);
 
-        for (Map<String, Object> data : dsl.getIterator()) {
+		String dslString = readDSLStringFromTemplateFile(templateFilePath);
+		log.debug("-- Template has DSL -> {}", dslString != null);
+		DefaultTemplateFileDslConfig dslConfig = new DefaultTemplateFileDsl().evaluate(dslString, excel);
 
-            OutputConfig outputConfig = dsl.getOutputConfig(data);
+		int iteration = -1;
+		for (Map<String, Object> data : dslConfig.getIterator()) {
+			iteration++;
 
-            Path outputDir = pathResolver.resolveOutputPath(
-                templateFilePath.getParent(),
-                Paths.get(outputConfig.getDir() == null ? "" : outputConfig.getDir()),
-                data,
-                context);
-            Path outputFile = outputDir.resolve(
-                outputConfig.getFilename() == null
-                        ? templateFilePath.getFileName().toString().replace(context.getTemplateExtension(), "")
-                        : outputConfig.getFilename());
+			log.info("-- ITERATION {} : START", iteration);
 
-            if (outputConfig.isSkip()) {
-                log.info("Skip: {}", outputFile);
-                continue;
-            }
+			if (log.isDebugEnabled()) {
+				log.debug("--- DATA: {}" ,JSON.stringify(data));
+			}
 
-            createOutputDirs(outputDir);
+			OutputConfig outputConfig = dslConfig.getOutputConfig(data);
 
-            if (Files.exists(outputFile) && !outputConfig.isOverride() || outputConfig.isSkipFile()) {
-                // if output file already exists and this file is not "override"
-                log.info("Skip: {}", outputFile);
-                continue;
-            }
+			if (log.isDebugEnabled()) {
+				XlBean bean = XlBeanFactory.getInstance().createBean();
+				bean.set(outputConfig);
+				log.debug("--- OUTPUT CONFIG: {}", JSON.stringify(bean));
+			}
 
-            generateFile(templateFilePath, outputFile, data, context);
-        }
-    }
+			Path outputDir = pathResolver.resolveOutputPath(templateFilePath.getParent(),
+					Paths.get(outputConfig.getDir() == null ? "" : outputConfig.getDir()), data, context);
+			Path outputFile = outputDir.resolve(outputConfig.getFilename() == null
+					? templateFilePath.getFileName().toString().replace(context.getTemplateExtension(), "")
+					: outputConfig.getFilename());
 
-    /**
-     * Copy template file to output directory. Target path is resolved by using
-     * templating engine.
-     * 
-     * @param templateFilePath
-     * @param context
-     */
-    private void copyFile(Path templateFilePath, TemplatingContext context) {
-        Path targetPath = pathResolver.resolveOutputPath(templateFilePath, context);
-        log.info("COPY FILE: {}", targetPath);
-        try {
-            Files.copy(templateFilePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+			if (outputConfig.isSkip()) {
+				log.info("--- RESULT: SKIP - skip=true.");
+				log.info("-- ITERATION {} : END", iteration);
+				continue;
+			}
 
-    private void createOutputDirs(Path outputDir) {
-        if (!Files.exists(outputDir)) {
-            // Create output directory if it doesn't exist.
-            try {
-                Files.createDirectories(outputDir);
-            } catch (IOException e) {
-                throw new RuntimeException("File system error occured for creating output directories/files", e);
-            }
-        }
-    }
+			createOutputDirs(outputDir);
 
-    private String readDSLStringFromTemplateFile(Path templatePath) {
-        try (BufferedReader br = Files.newBufferedReader(templatePath)) {
-            String line = br.readLine();
-            if (!"{####".equals(line.trim())) {
-                // DSL must start from the first line of the template file.
-                return null;
-            }
-            StringBuilder dsl = new StringBuilder();
-            while ((line = br.readLine()) != null) {
-                if ("####}".equals(line)) {
-                    return dsl.toString();
-                }
-                dsl.append(line);
-                dsl.append("\r\n");
-            }
-            throw new RuntimeException("Illegal DSL. DSL not closed." + templatePath);
-        } catch (MalformedInputException e) {
-            // ignore, since this is caused by excel file.
-            log.warn("Skip file with MalformedInputException. {}", templatePath);
-            return null;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+			if (outputConfig.isSkipFile()) {
+				log.info("--- RESULT: SKIP - skipFile=true");
+				log.info("-- ITERATION {} : END", iteration);
+				continue;
+			}
+			if (Files.exists(outputFile) && !outputConfig.isOverride()) {
+				// if output file already exists and this file is not "override"
+				log.info("--- RESULT: SKIP - target file already exists and override=false.");
+				log.info("-- ITERATION {} : END", iteration);
+				continue;
+			}
 
-    private void generateFile(
-            Path templateFilePath,
-            Path outputFile,
-            Map<String, Object> data,
-            TemplatingContext context) {
-        Map<String, Object> templateEngineContext = new XlScriptBindingsBuilder()
-            .excel(context.getExcel())
-            .it(data)
-            .build();
+			generateFile(templateFilePath, outputFile, data, context);
+			log.info("-- ITERATION {} : END", iteration);
+		}
 
-        log.info("Generate: {}", outputFile);
-        log.trace("Data: {}", templateEngineContext.toString().replaceAll("[\r\n]", ""));
+		log.info("- END template file.");
+	}
 
-        // Execute Templating Engine
-        engine.generate(templateFilePath, outputFile, templateEngineContext);
+	/**
+	 * Copy template file to output directory. Target path is resolved by using
+	 * templating engine.
+	 * 
+	 * @param templateFilePath
+	 * @param context
+	 */
+	private void copyFile(Path templateFilePath, TemplatingContext context) {
+		Path targetPath = pathResolver.resolveOutputPath(templateFilePath, context);
+		log.info("COPY FILE: {}", targetPath);
+		try {
+			Files.copy(templateFilePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			throw new XlTemplatingException(e);
+		}
+	}
 
-    }
+	private void createOutputDirs(Path outputDir) {
+		if (!Files.exists(outputDir)) {
+			// Create output directory if it doesn't exist.
+			try {
+				Files.createDirectories(outputDir);
+			} catch (IOException e) {
+				throw new XlTemplatingException("File system error occured for creating output directories/files", e);
+			}
+		}
+	}
+
+	private String readDSLStringFromTemplateFile(Path templatePath) {
+		try (BufferedReader br = Files.newBufferedReader(templatePath)) {
+			String line = br.readLine();
+			if (!"{####".equals(line.trim())) {
+				// DSL must start from the first line of the template file.
+				return null;
+			}
+			StringBuilder dsl = new StringBuilder();
+			while ((line = br.readLine()) != null) {
+				if ("####}".equals(line.trim())) {
+					return dsl.toString();
+				}
+				dsl.append(line);
+				dsl.append("\r\n");
+			}
+			throw new XlTemplatingDslException("Illegal DSL. DSL not closed." + templatePath);
+		} catch (MalformedInputException e) {
+			// ignore, since this is caused by excel file.
+			log.warn("Skip file with MalformedInputException. {}", templatePath);
+			return null;
+		} catch (IOException e) {
+			throw new XlTemplatingException(e);
+		}
+	}
+
+	private void generateFile(Path templateFilePath, Path outputFile, Map<String, Object> data,
+			TemplatingContext context) {
+		Map<String, Object> templateEngineContext = new XlScriptBindingsBuilder().excel(context.getExcel()).putAll(data)
+				.build();
+
+		log.info("--- RESULT: CREATE FILE: {}", outputFile);
+
+		// Execute Templating Engine
+		engine.generate(templateFilePath, outputFile, templateEngineContext);
+
+	}
 
 }

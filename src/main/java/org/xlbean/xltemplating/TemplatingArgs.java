@@ -4,6 +4,12 @@ import java.nio.charset.Charset;
 
 import org.kohsuke.args4j.Option;
 
+/**
+ * Program arguments.
+ * 
+ * @author Kazuya Tanikawa
+ *
+ */
 public class TemplatingArgs {
 
     @Option(name = "-f", aliases = "--excelFile", usage = "Path to Excel definition file")

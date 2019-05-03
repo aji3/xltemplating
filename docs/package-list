@@ -1,5 +1,8 @@
 org.xlbean.xltemplating
+org.xlbean.xltemplating.core
+org.xlbean.xltemplating.dsl
 org.xlbean.xltemplating.engine
 org.xlbean.xltemplating.engine.pebble
 org.xlbean.xltemplating.script
+org.xlbean.xltemplating.table
 org.xlbean.xltemplating.xlbean

@@ -59,7 +59,6 @@ public class TemplatingLifecycle {
      */
     private void walkThroughTemplates(TemplatingContext context) {
         List<Path> paths = getTargetTemplates(context);
-        paths.forEach(p -> System.out.println("result\t" + Files.isDirectory(p) + "\t" + p));
         paths.forEach(p -> generate(p, context));
     }
 
@@ -81,6 +80,8 @@ public class TemplatingLifecycle {
         if (Files.isDirectory(path)) {
             Path ignoreFile = path.resolve(".xltmpignore");
             if (Files.exists(ignoreFile)) {
+                // if another ignore file exists, then load the file and add it to the ignores
+                // and walk through the child folders.
                 XlTemplatingIgnoreLoader loader = new XlTemplatingIgnoreLoader(path, Charset.forName("utf-8"));
                 XlTemplatingIgnores newIgnores = loader.load();
                 ignores.merge(newIgnores);
@@ -89,6 +90,7 @@ public class TemplatingLifecycle {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                // after walking through child folders, remove this ignores.
                 ignores.remove(newIgnores);
             } else {
                 try {

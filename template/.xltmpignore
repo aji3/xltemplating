@@ -1,6 +1,7 @@
-# ignore all excel files
+# xltemplating
 *.xlsx
-
-# pre.groovy should not be copied to output
 pre.groovy
+
+# Pebble
+macros.txt
 

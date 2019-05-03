@@ -8,7 +8,8 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xlbean.xlscript.processor.AbstractXlScriptProcessor.XlScriptBindingsBuilder;
-import org.xlbean.xlscript.util.XlScript;
+import org.xlbean.xlscript.script.XlScript;
+import org.xlbean.xlscript.script.XlScriptFactory;
 import org.xlbean.xltemplating.core.TemplatePreprocessor;
 import org.xlbean.xltemplating.core.TemplatingContext;
 
@@ -35,10 +36,11 @@ public class DefaultTemplatePreprocessor implements TemplatePreprocessor {
         }
         log.info("EXECUTE PRE script");
         try {
-            XlScript script = new XlScript();
             Map<String, Object> map = new XlScriptBindingsBuilder().excel(context.getExcel()).build();
-            String scriptStr = new String(Files.readAllBytes(context.getPreScriptPath()));
-            script.evaluate(scriptStr, map);
+            String scriptText = new String(Files.readAllBytes(context.getPreScriptPath()));
+        	XlScriptFactory factory = new XlScriptFactory();
+            XlScript script = factory.getXlScript(scriptText);
+            script.execute(map);
         } catch (CompilationFailedException | IOException e) {
             throw new RuntimeException(e);
         }
